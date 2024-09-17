@@ -931,10 +931,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 267961
-  packageName: 'Starter Assets: Character Controllers | URP'
-  packageVersion: 1.1.0
-  assetPath: Assets/Starter Assets/Runtime/ThirdPersonController/Character/Animations/Locomotion--Run_S.anim.fbx
-  uploadId: 683311
