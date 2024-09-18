@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor.Timeline;
 using UnityEngine;
 
 public class PlayerTouchWall : MonoBehaviour
@@ -10,10 +11,15 @@ public class PlayerTouchWall : MonoBehaviour
 
     private List<GameObject> wallDetected = new List<GameObject>();
     private SphereCollider wallCollider = null;
+    private Animator animator;
+    private bool touchWall = false;
+    public CCD ccd = null;
+    private bool wallOnLeft = false;
 
     private void Start()
     {
         wallCollider = GetComponent<SphereCollider>();
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -23,9 +29,43 @@ public class PlayerTouchWall : MonoBehaviour
 
         Vector3 closestPointWall = FindNeareastPoint(GetNearestWall());
         if (closestPointWall == Vector3.zero)
+        {
+            touchWall = false;
             return; 
+        }
 
+        touchWall = true;
         targetHandIK.transform.position = closestPointWall;
+
+        Vector3 directionToTarget = (closestPointWall - transform.position).normalized;
+        float dotProduct = Vector3.Dot(transform.right, directionToTarget);
+        if (dotProduct > 0)
+            wallOnLeft = false;
+        else
+            wallOnLeft = true;
+    }
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        if (!touchWall)
+            return;
+
+        ccd.IK(wallOnLeft);
+
+        if(wallOnLeft)
+        {
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftUpperArm, ccd.res[0]);
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftLowerArm, ccd.res[1]);
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftHand, ccd.res[2]);
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftMiddleProximal, ccd.res[3]);
+        }
+        else
+        {
+            animator.SetBoneLocalRotation(HumanBodyBones.RightUpperArm, ccd.res[0]);
+            animator.SetBoneLocalRotation(HumanBodyBones.RightLowerArm, ccd.res[1]);
+            animator.SetBoneLocalRotation(HumanBodyBones.RightHand, ccd.res[2]);
+            animator.SetBoneLocalRotation(HumanBodyBones.RightMiddleProximal, ccd.res[3]);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
