@@ -50,7 +50,7 @@ public class PlayerTouchWall : MonoBehaviour
         if (!touchWall)
             return;
 
-        ccd.IK(wallOnLeft);
+        ccd.NewIK(wallOnLeft);
 
         if(wallOnLeft)
         {
