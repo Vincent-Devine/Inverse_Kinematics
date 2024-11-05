@@ -1,20 +1,20 @@
 using System.Collections.Generic;
-using UnityEditor.Timeline;
 using UnityEngine;
 
 public class PlayerTouchWall : MonoBehaviour
 {
-    [SerializeField] private GameObject targetHandIK = null;
-    [SerializeField] private string wallTag = "Wall";
-    [SerializeField] private LayerMask wallLayer;
-    [SerializeField] private float shoulderHeight = 1.5f;
-
+    [SerializeField] private GameObject playerChest = null;
+    [SerializeField] private GameObject playerNeck = null;
+    [SerializeField] private GameObject target = null;
+    [SerializeField] private CCD ikPlayer = null;
+    
     private List<GameObject> wallDetected = new List<GameObject>();
-    private SphereCollider wallCollider = null;
-    private Animator animator;
+    private string wallTag = "Wall";
     private bool touchWall = false;
-    public CCD ccd = null;
-    private bool wallOnLeft = false;
+    private Limb arm = Limb.LEFT_ARM;
+    
+    private Animator animator;
+    private SphereCollider wallCollider;
 
     private void Start()
     {
@@ -24,7 +24,7 @@ public class PlayerTouchWall : MonoBehaviour
 
     private void Update()
     {
-        if(!targetHandIK || wallDetected.Count == 0)
+        if(!target || wallDetected.Count == 0)
             return;
 
         Vector3 closestPointWall = FindNeareastPoint(GetNearestWall());
@@ -35,14 +35,15 @@ public class PlayerTouchWall : MonoBehaviour
         }
 
         touchWall = true;
-        targetHandIK.transform.position = closestPointWall;
+        target.transform.position = closestPointWall;
 
         Vector3 directionToTarget = (closestPointWall - transform.position).normalized;
         float dotProduct = Vector3.Dot(transform.right, directionToTarget);
+        
         if (dotProduct > 0)
-            wallOnLeft = false;
+            arm = Limb.RIGHT_ARM; // Wall on right
         else
-            wallOnLeft = true;
+            arm = Limb.LEFT_ARM;  // Wall on left
     }
 
     private void OnAnimatorIK(int layerIndex)
@@ -50,21 +51,19 @@ public class PlayerTouchWall : MonoBehaviour
         if (!touchWall)
             return;
 
-        ccd.NewIK(wallOnLeft);
+        Quaternion[] rotation = ikPlayer.IK(arm);
 
-        if(wallOnLeft)
+        if (arm == Limb.LEFT_ARM)
         {
-            animator.SetBoneLocalRotation(HumanBodyBones.LeftUpperArm, ccd.res[0]);
-            animator.SetBoneLocalRotation(HumanBodyBones.LeftLowerArm, ccd.res[1]);
-            animator.SetBoneLocalRotation(HumanBodyBones.LeftHand, ccd.res[2]);
-            animator.SetBoneLocalRotation(HumanBodyBones.LeftMiddleProximal, ccd.res[3]);
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftUpperArm, rotation[0]);
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftLowerArm, rotation[1]);
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftHand, rotation[2]);
         }
-        else
+        else // Right arm
         {
-            animator.SetBoneLocalRotation(HumanBodyBones.RightUpperArm, ccd.res[0]);
-            animator.SetBoneLocalRotation(HumanBodyBones.RightLowerArm, ccd.res[1]);
-            animator.SetBoneLocalRotation(HumanBodyBones.RightHand, ccd.res[2]);
-            animator.SetBoneLocalRotation(HumanBodyBones.RightMiddleProximal, ccd.res[3]);
+            animator.SetBoneLocalRotation(HumanBodyBones.RightUpperArm, rotation[0]);
+            animator.SetBoneLocalRotation(HumanBodyBones.RightLowerArm, rotation[1]);
+            animator.SetBoneLocalRotation(HumanBodyBones.RightHand, rotation[2]);
         }
     }
 
@@ -106,11 +105,11 @@ public class PlayerTouchWall : MonoBehaviour
         Vector3 neareastPoint = Vector3.zero;
         float closestDistance = float.MaxValue;
 
-        Vector3[] directions = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right, Vector3.up, Vector3.down };
-        Vector3 startPoint = transform.position + new Vector3(0, shoulderHeight, 0);
+        Vector3[] directions = { playerChest.transform.forward, -playerChest.transform.forward, -playerChest.transform.right, playerChest.transform.right, playerChest.transform.up, -playerChest.transform.up };
+        Vector3 startPoint = playerNeck.transform.position;
         foreach(Vector3 direction in directions)
         {
-            if(Physics.Raycast(startPoint, direction, out hit, wallCollider.radius, ~wallLayer.value))
+            if(Physics.Raycast(startPoint, direction, out hit, wallCollider.radius))
             {
                 float temp = Vector3.Distance(startPoint, hit.point);
                 if(temp < closestDistance)
