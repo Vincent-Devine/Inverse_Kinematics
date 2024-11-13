@@ -16,6 +16,13 @@ public class PlayerTouchWall : MonoBehaviour
     private Animator animator;
     private SphereCollider wallCollider;
 
+    private Quaternion[] fromRotation;
+    private Quaternion[] toRotation;
+    [SerializeField] private Transform[] leftArmBone;
+    [SerializeField] private Transform[] rightArmBone;
+    [SerializeField] private float lerpSpeed = .5f;
+    [SerializeField] private float lerpCount = 0f;
+
     private void Start()
     {
         wallCollider = GetComponent<SphereCollider>();
@@ -49,21 +56,54 @@ public class PlayerTouchWall : MonoBehaviour
     private void OnAnimatorIK(int layerIndex)
     {
         if (!touchWall)
+        {
+            lerpCount = 0f;
             return;
+        }
 
-        Quaternion[] rotation = ikPlayer.IK(arm);
+        if (lerpCount == 0f)
+        {
+            fromRotation = new Quaternion[leftArmBone.Length];
+            for (int i = 0; i < fromRotation.Length; i++)
+            {
+                if (arm == Limb.LEFT_ARM)
+                    fromRotation[i] = leftArmBone[i].localRotation;
+                else
+                    fromRotation[i] = rightArmBone[i].localRotation;
+            }
+            toRotation = ikPlayer.IK(arm);
+
+            Debug.Log("from: " + fromRotation[0]);
+            Debug.Log("to: " + toRotation[0]);
+        }
+
+        Quaternion[] result = new Quaternion[toRotation.Length];
+
+        if (lerpCount < 1f)
+        {
+            for(int i = 0; i < toRotation.Length; i++)
+                result[i] = Quaternion.Slerp(fromRotation[i], toRotation[i], lerpCount * lerpSpeed);
+
+            Debug.Log("lerp: " + result[0]);
+            lerpCount += Time.deltaTime;
+        }
+        else
+        {
+            result = ikPlayer.IK(arm);
+        }
+
 
         if (arm == Limb.LEFT_ARM)
         {
-            animator.SetBoneLocalRotation(HumanBodyBones.LeftUpperArm, rotation[0]);
-            animator.SetBoneLocalRotation(HumanBodyBones.LeftLowerArm, rotation[1]);
-            animator.SetBoneLocalRotation(HumanBodyBones.LeftHand, rotation[2]);
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftUpperArm, result[0]);
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftLowerArm, result[1]);
+            animator.SetBoneLocalRotation(HumanBodyBones.LeftHand, result[2]);
         }
         else // Right arm
         {
-            animator.SetBoneLocalRotation(HumanBodyBones.RightUpperArm, rotation[0]);
-            animator.SetBoneLocalRotation(HumanBodyBones.RightLowerArm, rotation[1]);
-            animator.SetBoneLocalRotation(HumanBodyBones.RightHand, rotation[2]);
+            animator.SetBoneLocalRotation(HumanBodyBones.RightUpperArm, result[0]);
+            animator.SetBoneLocalRotation(HumanBodyBones.RightLowerArm, result[1]);
+            animator.SetBoneLocalRotation(HumanBodyBones.RightHand, result[2]);
         }
     }
 
@@ -119,6 +159,10 @@ public class PlayerTouchWall : MonoBehaviour
                 }
             }
         }
+
+        // Don't touch the wall is too near the wall
+        if(closestDistance < 0.4f)
+            return Vector3.zero;
 
         return neareastPoint;
     }

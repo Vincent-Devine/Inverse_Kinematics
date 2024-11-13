@@ -87,7 +87,7 @@ public class CCD : MonoBehaviour
     private Quaternion AddConstraint(Quaternion rotation, Constraint boneUsed)
     {
         if (!addConstraint)
-            return Quaternion.identity;
+            return rotation;
 
         BoneConstraint boneConstraint = boneUsed.GetBoneContraint();
 

@@ -1637,6 +1637,11 @@ PrefabInstance:
       objectReference: {fileID: 156327711}
     - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
         type: 3}
+      propertyPath: lerpSpeed
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
       propertyPath: playerNeck
       value: 
       objectReference: {fileID: 1467161624}
@@ -1650,6 +1655,46 @@ PrefabInstance:
       propertyPath: targetHandIK
       value: 
       objectReference: {fileID: 413812010}
+    - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
+      propertyPath: leftArmBone.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
+      propertyPath: rightArmBone.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
+      propertyPath: leftArmBone.Array.data[0]
+      value: 
+      objectReference: {fileID: 549278145}
+    - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
+      propertyPath: leftArmBone.Array.data[1]
+      value: 
+      objectReference: {fileID: 1339452971}
+    - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
+      propertyPath: leftArmBone.Array.data[2]
+      value: 
+      objectReference: {fileID: 1423089677}
+    - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
+      propertyPath: rightArmBone.Array.data[0]
+      value: 
+      objectReference: {fileID: 1586587691}
+    - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
+      propertyPath: rightArmBone.Array.data[1]
+      value: 
+      objectReference: {fileID: 642894311}
+    - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
+      propertyPath: rightArmBone.Array.data[2]
+      value: 
+      objectReference: {fileID: 1544349980}
     - target: {fileID: 2686855612374952310, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
         type: 3}
       propertyPath: m_LocalPosition.x
