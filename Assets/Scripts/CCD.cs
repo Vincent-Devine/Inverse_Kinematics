@@ -9,6 +9,7 @@ public class CCD : MonoBehaviour
     
     [SerializeField] private float epsilon = 0.1f;
     [SerializeField] private GameObject target;
+    [SerializeField] private int maxIteration = 20;
 
     [SerializeField] private bool addConstraint = true;
 
@@ -16,28 +17,36 @@ public class CCD : MonoBehaviour
     {
         Constraint[] boneUsed = GetBoneToIK(limb);
         Quaternion[] result = new Quaternion[boneUsed.Length];
-        for(int i = 0; i < boneUsed.Length; i++)
-            result[i] = boneUsed[i].transform.localRotation;
-
-        if (CheckIKSolve(boneUsed))
-            return result;
         
-        for (int i = boneUsed.Length - 1; i >= 0; i--)
+        for (int j = 0; j < maxIteration; j++)
         {
-            Matrix4x4 inverseTranformMatrix = boneUsed[i].transform.localToWorldMatrix.inverse;
-            Vector3 endEffectorDirection = Matrix4x4MultTranslation(boneUsed[boneUsed.Length - 1].transform.position, inverseTranformMatrix).normalized;
-            Vector3 targetDirection = Matrix4x4MultTranslation(target.transform.position, inverseTranformMatrix).normalized;
+            for(int i = 0; i < boneUsed.Length; i++)
+                result[i] = boneUsed[i].transform.localRotation;
 
-            float dotProduct = Vector3.Dot(endEffectorDirection, targetDirection);
-            if(dotProduct < 1.0f - 1.0e-6f)
+            if (CheckIKSolve(boneUsed))
+                return result;
+
+            for (int i = boneUsed.Length - 1; i >= 0; i--)
             {
-                float rotationAngle = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
-                Vector3 rotationAxis = Vector3.Cross(endEffectorDirection, targetDirection).normalized;
-                boneUsed[i].transform.Rotate(rotationAxis, rotationAngle);
+                Matrix4x4 inverseTranformMatrix = boneUsed[i].transform.localToWorldMatrix.inverse;
+                Vector3 endEffectorDirection = Matrix4x4MultTranslation(boneUsed[boneUsed.Length - 1].transform.position, inverseTranformMatrix).normalized;
+                Vector3 targetDirection = Matrix4x4MultTranslation(target.transform.position, inverseTranformMatrix).normalized;
 
-                AddConstraint(boneUsed[i]);
+                float dotProduct = Vector3.Dot(endEffectorDirection, targetDirection);
+                if(dotProduct < 1.0f - 1.0e-6f)
+                {
+                    float rotationAngle = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
+                    Vector3 rotationAxis = Vector3.Cross(endEffectorDirection, targetDirection).normalized;
+
+                    Quaternion rotation = Quaternion.AngleAxis(rotationAngle, rotationAxis);
+                    Quaternion newLocalRotation = boneUsed[i].transform.localRotation * rotation;
+
+                    newLocalRotation = AddConstraint(newLocalRotation, boneUsed[i]);
+
+                    boneUsed[i].transform.localRotation = newLocalRotation;
+                    result[i] = boneUsed[i].transform.localRotation;
+                }
             }
-            result[i] = boneUsed[i].transform.localRotation;
         }
         return result;
     }
@@ -75,17 +84,24 @@ public class CCD : MonoBehaviour
         return false;
     }
 
-    private void AddConstraint(Constraint boneUsed)
+    private Quaternion AddConstraint(Quaternion rotation, Constraint boneUsed)
     {
         if (!addConstraint)
-            return;
+            return Quaternion.identity;
 
-        Vector3 constraintAngle;
         BoneConstraint boneConstraint = boneUsed.GetBoneContraint();
 
-        constraintAngle.x = Mathf.Clamp((boneUsed.transform.localEulerAngles.x + 180) % 360 - 180, boneConstraint.minXAngle, boneConstraint.maxXAngle);
-        constraintAngle.y = Mathf.Clamp((boneUsed.transform.localEulerAngles.y + 180) % 360 - 180, boneConstraint.minYAngle, boneConstraint.maxYAngle);
-        constraintAngle.z = Mathf.Clamp((boneUsed.transform.localEulerAngles.z + 180) % 360 - 180, boneConstraint.minZAngle, boneConstraint.maxZAngle);
-        boneUsed.transform.localEulerAngles = constraintAngle;
+        Vector3 euler = rotation.eulerAngles;
+        euler.x = ClampAngle(euler.x, boneConstraint.minXAngle, boneConstraint.maxXAngle);
+        euler.y = ClampAngle(euler.y, boneConstraint.minYAngle, boneConstraint.maxYAngle);
+        euler.z = ClampAngle(euler.z, boneConstraint.minZAngle, boneConstraint.maxZAngle);
+
+        return Quaternion.Euler(euler);
+    }
+
+    float ClampAngle(float angle, float min, float max)
+    {
+        angle = (angle > 180) ? angle - 360 : angle; // Normalize angle to range [-180, 180]
+        return Mathf.Clamp(angle, min, max);
     }
 }

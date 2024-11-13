@@ -446,12 +446,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boneConstraint:
-    minXAngle: 0
-    maxXAngle: 0
-    minYAngle: 0
-    maxYAngle: 0
-    minZAngle: 0
-    maxZAngle: 0
+    minXAngle: -35
+    maxXAngle: 25
+    minYAngle: -60
+    maxYAngle: 90
+    minZAngle: -35
+    maxZAngle: 80
 --- !u!4 &549278145 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2686855612374952310, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
@@ -524,12 +524,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boneConstraint:
-    minXAngle: 0
-    maxXAngle: 0
-    minYAngle: 0
-    maxYAngle: 0
-    minZAngle: 0
-    maxZAngle: 0
+    minXAngle: -130
+    maxXAngle: 40
+    minYAngle: -80
+    maxYAngle: 100
+    minZAngle: 70
+    maxZAngle: 140
 --- !u!1 &679938791
 GameObject:
   m_ObjectHideFlags: 0
@@ -593,9 +593,9 @@ MonoBehaviour:
     minXAngle: 0
     maxXAngle: 120
     minYAngle: 0
-    maxYAngle: 0
-    minZAngle: 0
-    maxZAngle: 0
+    maxYAngle: 60
+    minZAngle: 15
+    maxZAngle: 100
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -744,12 +744,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boneConstraint:
-    minXAngle: -140
-    maxXAngle: 0
-    minYAngle: 180
-    maxYAngle: 180
-    minZAngle: -90
-    maxZAngle: 0
+    minXAngle: -130
+    maxXAngle: 40
+    minYAngle: -80
+    maxYAngle: 100
+    minZAngle: 70
+    maxZAngle: 140
 --- !u!1 &954381436
 GameObject:
   m_ObjectHideFlags: 0
@@ -1286,11 +1286,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boneConstraint:
     minXAngle: 0
-    maxXAngle: 0
+    maxXAngle: 120
     minYAngle: 0
-    maxYAngle: 0
-    minZAngle: 0
-    maxZAngle: 0
+    maxYAngle: 60
+    minZAngle: 15
+    maxZAngle: 100
 --- !u!4 &1423089677 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3174892045208258451, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
@@ -1451,12 +1451,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boneConstraint:
-    minXAngle: -80
-    maxXAngle: 0
-    minYAngle: -90
+    minXAngle: -35
+    maxXAngle: 25
+    minYAngle: -60
     maxYAngle: 90
-    minZAngle: 0
-    maxZAngle: 40
+    minZAngle: -35
+    maxZAngle: 80
 --- !u!4 &1972566452 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 433110706348125767, guid: 2817da0798b660544b22a46af0c3b3fa,
@@ -1762,6 +1762,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5461002402579747582, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
         type: 3}
+      propertyPath: maxIteration
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 5461002402579747582, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
+        type: 3}
       propertyPath: addConstraint
       value: 1
       objectReference: {fileID: 0}
@@ -2063,7 +2068,7 @@ PrefabInstance:
     - target: {fileID: 5795069569641054369, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
         type: 3}
       propertyPath: m_Radius
-      value: 0.7
+      value: 0.65
       objectReference: {fileID: 0}
     - target: {fileID: 6947832431180264758, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
         type: 3}
