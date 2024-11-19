@@ -1638,7 +1638,7 @@ PrefabInstance:
     - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
         type: 3}
       propertyPath: lerpSpeed
-      value: 2
+      value: 3.5
       objectReference: {fileID: 0}
     - target: {fileID: 1925472589113123873, guid: a5c61234b4d35644eb5b851b6cfa1ea4,
         type: 3}

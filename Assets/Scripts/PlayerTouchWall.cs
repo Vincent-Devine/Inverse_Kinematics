@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class PlayerTouchWall : MonoBehaviour
 {
     [SerializeField] private GameObject playerChest = null;
@@ -16,12 +17,13 @@ public class PlayerTouchWall : MonoBehaviour
     private Animator animator;
     private SphereCollider wallCollider;
 
-    private Quaternion[] fromRotation;
-    private Quaternion[] toRotation;
+    private Vector3 fromPosition;
+    private Vector3 basePosition;
     [SerializeField] private Transform[] leftArmBone;
     [SerializeField] private Transform[] rightArmBone;
     [SerializeField] private float lerpSpeed = .5f;
     [SerializeField] private float lerpCount = 0f;
+    [SerializeField] private bool startLerpIkToAnim = false;
 
     private void Start()
     {
@@ -35,63 +37,27 @@ public class PlayerTouchWall : MonoBehaviour
             return;
 
         Vector3 closestPointWall = FindNeareastPoint(GetNearestWall());
+        Debug.Log(closestPointWall);
         if (closestPointWall == Vector3.zero)
         {
+            // LerpWallToAnimation();
             touchWall = false;
+            lerpCount = 0f;
             return; 
         }
 
+        startLerpIkToAnim = false;
         touchWall = true;
-        target.transform.position = closestPointWall;
-
-        Vector3 directionToTarget = (closestPointWall - transform.position).normalized;
-        float dotProduct = Vector3.Dot(transform.right, directionToTarget);
-        
-        if (dotProduct > 0)
-            arm = Limb.RIGHT_ARM; // Wall on right
-        else
-            arm = Limb.LEFT_ARM;  // Wall on left
+        SetRightHand(closestPointWall);
+        LerpAnimationToWall(closestPointWall);
     }
 
     private void OnAnimatorIK(int layerIndex)
     {
         if (!touchWall)
-        {
-            lerpCount = 0f;
             return;
-        }
-
-        if (lerpCount == 0f)
-        {
-            fromRotation = new Quaternion[leftArmBone.Length];
-            for (int i = 0; i < fromRotation.Length; i++)
-            {
-                if (arm == Limb.LEFT_ARM)
-                    fromRotation[i] = leftArmBone[i].localRotation;
-                else
-                    fromRotation[i] = rightArmBone[i].localRotation;
-            }
-            toRotation = ikPlayer.IK(arm);
-
-            Debug.Log("from: " + fromRotation[0]);
-            Debug.Log("to: " + toRotation[0]);
-        }
-
-        Quaternion[] result = new Quaternion[toRotation.Length];
-
-        if (lerpCount < 1f)
-        {
-            for(int i = 0; i < toRotation.Length; i++)
-                result[i] = Quaternion.Slerp(fromRotation[i], toRotation[i], lerpCount * lerpSpeed);
-
-            Debug.Log("lerp: " + result[0]);
-            lerpCount += Time.deltaTime;
-        }
-        else
-        {
-            result = ikPlayer.IK(arm);
-        }
-
+        
+        Quaternion[] result = ikPlayer.IK(arm);
 
         if (arm == Limb.LEFT_ARM)
         {
@@ -165,5 +131,59 @@ public class PlayerTouchWall : MonoBehaviour
             return Vector3.zero;
 
         return neareastPoint;
+    }
+
+    private void SetRightHand(Vector3 position)
+    {
+        Vector3 directionToTarget = (position - transform.position).normalized;
+        float dotProduct = Vector3.Dot(transform.right, directionToTarget);
+
+        if (dotProduct > 0)
+            arm = Limb.RIGHT_ARM; // Wall on right
+        else
+            arm = Limb.LEFT_ARM;  // Wall on left
+    }
+
+    private void LerpAnimationToWall(Vector3 closestPointWall)
+    {
+        if (lerpCount == 0f)
+        {
+            if (arm == Limb.LEFT_ARM)
+                fromPosition = leftArmBone[leftArmBone.Length - 1].position; // hand position
+            else
+                fromPosition = rightArmBone[rightArmBone.Length - 1].position; // hand position
+
+            basePosition = fromPosition - transform.position;
+        }
+
+        if (lerpCount < 1f)
+        {
+            target.transform.position = Vector3.Lerp(fromPosition, closestPointWall, lerpCount);
+            lerpCount += Time.deltaTime * lerpSpeed;
+        }
+        else
+        {
+            target.transform.position = closestPointWall;
+        }
+    }
+
+    private void LerpWallToAnimation()
+    {
+        if (!startLerpIkToAnim)
+        {
+            fromPosition = target.transform.position; // hand position
+            startLerpIkToAnim = true;
+        }
+
+        if (lerpCount > 0.0f)
+        {
+            target.transform.position = Vector3.Lerp(fromPosition, basePosition + transform.position, lerpCount);
+            lerpCount -= Time.deltaTime * lerpSpeed;
+        }
+        else
+        {
+            lerpCount = 0;
+            touchWall = false;
+        }
     }
 }
