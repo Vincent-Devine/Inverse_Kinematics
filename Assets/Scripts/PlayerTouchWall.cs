@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 
 public class PlayerTouchWall : MonoBehaviour
@@ -9,44 +10,40 @@ public class PlayerTouchWall : MonoBehaviour
     [SerializeField] private GameObject target = null;
     [SerializeField] private CCD ikPlayer = null;
     
-    private List<GameObject> wallDetected = new List<GameObject>();
-    private string wallTag = "Wall";
+    [SerializeField] private float maxSizeTouchWall = .65f;
+    [SerializeField] private float minSizeTouchWall = .4f;
     private bool touchWall = false;
     private Limb arm = Limb.LEFT_ARM;
-    
-    private Animator animator;
-    private SphereCollider wallCollider;
 
-    private Vector3 fromPosition;
-    private Vector3 basePosition;
-    [SerializeField] private Transform[] leftArmBone;
-    [SerializeField] private Transform[] rightArmBone;
+    private Animator animator;
+
+    [SerializeField] private Transform leftHandBone;
+    [SerializeField] private Transform rightHandBone;
+    [SerializeField] private Transform leftBasePosHand;
+    [SerializeField] private Transform rightBasePosHand;
     [SerializeField] private float lerpSpeed = .5f;
-    [SerializeField] private float lerpCount = 0f;
-    [SerializeField] private bool startLerpIkToAnim = false;
+    private Vector3 fromPosition;
+    private float lerpCount = 0f;
+    private bool startLerpIkToAnim = false;
+    private bool needToLerpIkToAnim = false;
 
     private void Start()
     {
-        wallCollider = GetComponent<SphereCollider>();
         animator = GetComponent<Animator>();
     }
 
     private void Update()
     {
-        if(!target || wallDetected.Count == 0)
-            return;
-
-        Vector3 closestPointWall = FindNeareastPoint(GetNearestWall());
-        Debug.Log(closestPointWall);
+        Vector3 closestPointWall = FindNeareastPoint();
         if (closestPointWall == Vector3.zero)
         {
-            // LerpWallToAnimation();
-            touchWall = false;
-            lerpCount = 0f;
+            if(needToLerpIkToAnim)
+                LerpWallToAnimation();
             return; 
         }
 
         startLerpIkToAnim = false;
+        needToLerpIkToAnim = true;
         touchWall = true;
         SetRightHand(closestPointWall);
         LerpAnimationToWall(closestPointWall);
@@ -73,39 +70,7 @@ public class PlayerTouchWall : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.gameObject.CompareTag(wallTag))
-            wallDetected.Add(other.gameObject);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        wallDetected.Remove(other.gameObject);
-    }
-
-    private GameObject GetNearestWall()
-    {
-        if(wallDetected.Count == 1)
-            return wallDetected[0];
-        
-        float nearestWallDistance = float.MaxValue;
-        GameObject nearestWall = null;
-
-        foreach(GameObject wall in wallDetected)
-        {
-            float temp = Vector3.Distance(transform.position, wall.transform.position);
-            if(temp < nearestWallDistance)
-            {
-                nearestWall = wall;
-                nearestWallDistance = temp;
-            }
-        }
-
-        return nearestWall;
-    }
-
-    private Vector3 FindNeareastPoint(GameObject wall)
+    private Vector3 FindNeareastPoint()
     {
         RaycastHit hit;
         Vector3 neareastPoint = Vector3.zero;
@@ -115,7 +80,7 @@ public class PlayerTouchWall : MonoBehaviour
         Vector3 startPoint = playerNeck.transform.position;
         foreach(Vector3 direction in directions)
         {
-            if(Physics.Raycast(startPoint, direction, out hit, wallCollider.radius))
+            if(Physics.Raycast(startPoint, direction, out hit, maxSizeTouchWall))
             {
                 float temp = Vector3.Distance(startPoint, hit.point);
                 if(temp < closestDistance)
@@ -127,7 +92,7 @@ public class PlayerTouchWall : MonoBehaviour
         }
 
         // Don't touch the wall is too near the wall
-        if(closestDistance < 0.4f)
+        if(closestDistance < minSizeTouchWall)
             return Vector3.zero;
 
         return neareastPoint;
@@ -149,11 +114,9 @@ public class PlayerTouchWall : MonoBehaviour
         if (lerpCount == 0f)
         {
             if (arm == Limb.LEFT_ARM)
-                fromPosition = leftArmBone[leftArmBone.Length - 1].position; // hand position
+                fromPosition = leftHandBone.position;
             else
-                fromPosition = rightArmBone[rightArmBone.Length - 1].position; // hand position
-
-            basePosition = fromPosition - transform.position;
+                fromPosition = rightHandBone.position;
         }
 
         if (lerpCount < 1f)
@@ -173,17 +136,24 @@ public class PlayerTouchWall : MonoBehaviour
         {
             fromPosition = target.transform.position; // hand position
             startLerpIkToAnim = true;
+            lerpCount = 0f;
         }
 
-        if (lerpCount > 0.0f)
+        if (lerpCount < 1f)
         {
-            target.transform.position = Vector3.Lerp(fromPosition, basePosition + transform.position, lerpCount);
-            lerpCount -= Time.deltaTime * lerpSpeed;
+            Vector3 toPosition = rightBasePosHand.position;
+            if(arm == Limb.LEFT_ARM)
+                toPosition = leftBasePosHand.position;
+
+            target.transform.position = Vector3.Lerp(fromPosition, toPosition, lerpCount);
+            lerpCount += Time.deltaTime * lerpSpeed;
         }
         else
         {
             lerpCount = 0;
             touchWall = false;
+            startLerpIkToAnim = false;
+            needToLerpIkToAnim = false;
         }
     }
 }
