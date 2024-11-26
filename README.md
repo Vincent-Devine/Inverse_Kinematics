@@ -23,6 +23,10 @@ IK algorithms: **CCD** <br>
 To configure the CCD settings, select the Player object from the Hierarchy. In the Inspector panel, locate the CCD script,
 where you can **enable or disable bone constraints** *(enabled by default)*.
 
+<p align="center">
+    <img src="./Screenshot/ik_constraint.png" alt="drawing" width="200"/>
+</p>
+
 Script:<br>
 - **CCD**: responsible for **calculating IK** on the bones
 - **PlayerTouchWall**: switches the hand closest to a wall from animation to IK, using the CCD script to control its movement.
@@ -30,7 +34,10 @@ It also handles smooth transitions between the animation and IK systems.
 
 ### Demonstration <br>
 
-![GIF](./Screenshot/ik_demonstration.gif)<br>
+<p align="center">
+    <img src="./Screenshot/ik_demonstration.gif" alt="drawing"/>
+</p>
+
 Scene: **Scenes/Demonstration** <br>
 Start the scene to demonstrate inverse kinematics in action. When the player gets near a wall, their hand automatically reaches out to touch it.<br>
 This interaction works only when the player is within touching range but not too close.<br>
@@ -39,7 +46,10 @@ Player controls: **W, A, S, D** for movement and the **mouse** for camera rotati
 
 ### Free trial <br>
 
-![GIF](./Screenshot/ik_free_trial.gif)<br>
+<p align="center">
+    <img src="./Screenshot/ik_free_trial.gif" alt="drawing"/>
+</p>
+
 Scene: **Scenes/FreeTrial** <br>
 Start the scene and navigate to the Scene view to **manually move the target** *(red dot)*.<br>
 The player's hand will follow to align with the target's position.<br>
@@ -52,7 +62,7 @@ During free trial, limitations become apparent, such as the inability to raise t
 
 ## Technology
 - Engine: **Unity** *v2022.3.34f1*
-- IDE: Visual Studio 2022
+- IDE: **Visual Studio** 2022
 - Versionning: [Github](https://github.com/Vincent-Devine/Inverse_Kinematics)
 
 ## Credit
